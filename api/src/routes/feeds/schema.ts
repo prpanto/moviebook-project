@@ -1,30 +1,24 @@
-import { z } from 'zod'
+import { z } from "zod";
 
 const feedStore = z.object({
-  body: z.object({
-    movie_id: z.string(),
-    rating: z.coerce.number().min(1).max(5).default(1),
-    content: z.string("Content must include.").default(''),
-  })
-})
+  movie_id: z.string(),
+  rating: z.coerce.number().min(1).max(5).default(1),
+  content: z.string("Content must include.").default(""),
+});
 
 const feedUpdate = z.object({
-  body: z.object({
-    rating: z.coerce.number().min(1).max(5).optional(),
-    content: z.string("Content must include.").optional(),
-  })
-})
+  rating: z.coerce.number().min(1).max(5).optional(),
+  content: z.string("Content must include.").optional(),
+});
 
 const feedComment = z.object({
-  body: z.object({
-    content: z.string("Content must include."),
-    parent: z.string().nullable().optional(),
-  })
-})
+  content: z.string("Content must include."),
+  parent: z.string().nullable().optional(),
+});
 
-export type FeedStoreInput = z.infer<typeof feedStore>['body']
-export type FeedUpdateInput = z.infer<typeof feedUpdate>['body']
-export type FeedCommentInput = z.infer<typeof feedComment>['body']
+export type FeedStoreInput = z.infer<typeof feedStore>;
+export type FeedUpdateInput = z.infer<typeof feedUpdate>;
+export type FeedCommentInput = z.infer<typeof feedComment>;
 
 const schema = {
   feed: {
@@ -32,6 +26,6 @@ const schema = {
     update: feedUpdate,
   },
   comment: feedComment,
-}
+};
 
-export default schema
+export default schema;

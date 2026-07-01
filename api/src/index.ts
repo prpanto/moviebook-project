@@ -1,73 +1,28 @@
-import 'dotenv/config'
-import express from 'express'
-import cors from 'cors'
-import morgan from 'morgan'
-import cookieParser from 'cookie-parser'
-import { errorHandler } from './middlewares'
-import useDatabase from './lib/database'
-import dns from 'dns'
-import swaggerUi from 'swagger-ui-express'
-import YAML from 'yamljs'
+import "dotenv/config";
+import express from "express";
+import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
 import {
-  auth,
-  user,
   movies,
   feeds,
-} from './routes'
+} from "./routes";
 
-if (process.env.NODE_ENV !== 'production') {
-  dns.setServers(['1.1.1.1', '8.8.8.8'])
-}
+const swaggerDocument = YAML.load("./swagger.yaml");
 
-const swaggerDocument = YAML.load('./swagger.yaml')
+const app = express();
 
-const app = express()
-const database = await useDatabase()
+const APP_PORT = process.env.APP_PORT || 8000;
+const APP_URL = process.env.APP_URL;
 
-await database.connect().catch((error) => {
-  console.error('MongoDB connection error:', error)
-})
+app.use(morgan("tiny"));
+app.use(express.json());
 
-const APP_PORT = parseInt(process.env.APP_PORT || '8000')
-const APP_URL = process.env.APP_URL || 'http://localhost:8000'
-const FRONTEND_URL = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '')
-const allowedOrigins = [FRONTEND_URL, 'http://127.0.0.1:5173']
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      const normalizedOrigin = origin?.replace(/\/$/, '')
-
-      if (!origin || allowedOrigins.includes(normalizedOrigin || '')) {
-        callback(null, true)
-        return
-      }
-
-      callback(new Error('Not allowed by CORS'))
-    },
-    credentials: true,
-  })
-)
-app.use(morgan('tiny'))
-app.use(express.json())
-app.use(cookieParser())
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-app.use('/api/auth', auth)
-app.use('/api/user', user)
-app.use('/api/movies', movies)
-app.use('/api/feeds', feeds)
-
-app.use(errorHandler)
+app.use("/api/movies", movies);
+app.use("/api/feeds", feeds);
 
 app.listen(APP_PORT, () => {
-  console.log(`Server is running at ${APP_URL}`)
-})
-
-const cleanup = async () => {
-  await database.disconnect()
-  process.exit(0)
-}
-
-process.on('SIGINT', cleanup)
-process.on('SIGTERM', cleanup)
+  console.log(`Server is running at ${APP_URL}`);
+});
