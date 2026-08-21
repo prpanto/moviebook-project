@@ -5,10 +5,11 @@ import schema from "./schema";
 
 const router: Router = Router();
 
-router.get("/search", Movie.search);
 router.get("/list", Movie.list);
-router.get("/:id/credits", Movie.credits);
+router.get("/genres", Movie.genres);
+router.get("/search", Movie.search);
 router.get("/:id", Movie.detail);
+router.get("/:id/credits", Movie.credits);
 
 router.get("/:movie/comments", Comment.index);
 router.get("/:movie/comments/:id", Comment.show);

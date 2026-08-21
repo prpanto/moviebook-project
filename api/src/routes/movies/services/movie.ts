@@ -1,3 +1,5 @@
+import { fetcher } from "@/utils";
+
 class Movie {
   async fetcher(path: string, options: RequestInit | undefined = {}) {
     const THEMOVIEDB_API_URL = process.env.THEMOVIEDB_API_URL;
@@ -9,7 +11,7 @@ class Movie {
 
     const url = `${THEMOVIEDB_API_URL}${path}`;
 
-    const init: RequestInit = {
+    options = {
       headers: {
         accept: "application/json",
         Authorization: `Bearer ${THEMOVIEDB_ACCESS_TOKEN}`,
@@ -17,72 +19,27 @@ class Movie {
       ...options,
     };
 
-    try {
-      const response = await fetch(url, init);
-      const data = await response.json();
-
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-
-      throw new Error(String(error));
-    }
+    return await fetcher(url, options);
   }
 
   async list(type: string, page: string) {
-    try {
-      const data = await this.fetcher(`/movie/${type}?language=en-US&page=${page}`);
-
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-
-      throw new Error(String(error));
-    }
+    return await this.fetcher(`/movie/${type}?language=en-US&page=${page}`);
   }
 
-  async search(query: string, page: string) {
-    try {
-      const data = await this.fetcher(`/search/movie?query=${encodeURIComponent(query)}&language=en-US&page=${page}`);
-
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-
-      throw new Error(String(error));
-    }
+  async search(q: string, page: string) {
+    return await this.fetcher(`/search/movie?query=${encodeURIComponent(q)}&language=en-US&page=${page}`);
   }
 
   async detail(id: string) {
-    try {
-      const data = await this.fetcher(`/movie/${encodeURIComponent(String(id))}?language=en-US`);
-
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-
-      throw new Error(String(error));
-    }
+    return await this.fetcher(`/movie/${encodeURIComponent(String(id))}?language=en-US`);
   }
-  async credits(id: string) {
-    try {
-      const data = await this.fetcher(`/movie/${encodeURIComponent(String(id))}/credits?language=en-US`);
 
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error(String(error));
-    }
+  async credits(id: string) {
+    return await this.fetcher(`/movie/${encodeURIComponent(String(id))}/credits?language=en-US`);
+  }
+
+  async genres() {
+    return await this.fetcher('/genre/movie/list');
   }
 }
 

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const movieComment = z.object({
   content: z.string("Content must include."),
-  parent: z.string().nullable().optional(),
+  parent: z.string("Parent comment ID is required.").nullable().optional(),
 });
 
 export type MovieCommentInput = z.infer<typeof movieComment>;

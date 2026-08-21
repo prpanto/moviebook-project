@@ -1,32 +1,22 @@
-import type { Request, Response, NextFunction } from "express";
-import type { ZodType } from "zod";
+import { z } from "zod";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+import { zodErrorFormatter } from "@/utils";
 
-const validate = (schema: ZodType<any, any, any>) => {
+const validator = <T extends z.ZodTypeAny>(schema: T): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const result = schema.safeParse(req.body);
+    const validation = schema.safeParse(req.body);
 
-      if (!result.success) {
-        const errors: Record<string, string> = {};
-
-        result.error.issues.forEach((error) => {
-          const field = error.path[error.path.length - 1]?.toString() || "unknown";
-
-          if (!errors[field]) {
-            errors[field] = error.message;
-          }
-        })
-
-        return next(errors);
-      }
-
-      req.body = result.data;
-
-      next();
-    } catch (error) {
-      next(error);
+    if (!validation.success) {     
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: zodErrorFormatter(validation.error)
+      });
     }
+
+    req.body = validation.data;
+
+    next(); 
   }
 }
 
-export default validate;
+export default validator;
